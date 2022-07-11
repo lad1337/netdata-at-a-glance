@@ -4,8 +4,9 @@ ADD --chown=rust:rust . ./
 RUN cargo build --release
 
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates curl
 COPY --from=builder \
     /home/rust/src/target/x86_64-unknown-linux-musl/release/netdata-at-a-glance \
     /usr/local/bin/
-ENTRYPOINT ["./usr/local/bin/netdata-at-a-glance"]
+COPY entrypoint.sh /usr/local/entrypoint.sh
+ENTRYPOINT ["/usr/local/entrypoint.sh"]
