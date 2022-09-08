@@ -4,10 +4,22 @@ use reqwest::blocking::get;
 use super::config;
 
 pub fn get_value(config: &config::Config) -> i64 {
-    let res = get(&config.netdata_uri).unwrap();
-    let resp = res.json::<NetdataResponse>().unwrap();
-    let value = resp.latest_values.last();
     let mut s: i64 = 0;
+let res = get(&config.netdata_uri);
+    match res {
+        Ok(_) => (),
+        Err(_) => (s = 99),
+    };
+    if s == 99 { return s; }
+    let resp = res.unwrap().json::<NetdataResponse>();
+    match resp {
+        Ok(_) => (),
+        Err(_) => (s = 98),
+    };
+    if s == 98 { return s; }
+
+    let plex_stats = resp.unwrap();
+    let value = plex_stats.latest_values.last();
     match value {
         Some(p) =>  (s = *p),
         None => (),
