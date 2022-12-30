@@ -5,23 +5,27 @@ use super::config;
 
 pub fn get_value(config: &config::Config) -> i64 {
     let mut s: i64 = 0;
-let res = get(&config.netdata_uri);
+    let res = get(&config.netdata_uri);
     match res {
         Ok(_) => (),
-        Err(_) => (s = 99),
+        Err(e) => {
+            println!("Error loading data (code 99): {}", e);
+            return 99;
+        },
     };
-    if s == 99 { return s; }
     let resp = res.unwrap().json::<NetdataResponse>();
     match resp {
         Ok(_) => (),
-        Err(_) => (s = 98),
+        Err(e) => {
+            println!("Error parsing data (code 98): {}", e);
+            return 98;
+        },
     };
-    if s == 98 { return s; }
 
     let plex_stats = resp.unwrap();
     let value = plex_stats.latest_values.last();
     match value {
-        Some(p) =>  (s = *p),
+        Some(p) =>  s = *p,
         None => (),
     }
     println!("Netadata value: {}", s);
